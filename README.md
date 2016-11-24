@@ -11,6 +11,10 @@ This requires:
   - GraphicsMagick -- http://www.graphicsmagick.org/
   - pytumblr -- https://github.com/tumblr/pytumblr
 
+
+Create your own config
+    cp config-dist.py config.py
+
 Be sure to add all of your own keys to config.py
 
 See also a companion projector to the photo booth.

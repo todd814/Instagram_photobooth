@@ -23,3 +23,8 @@ hi_res_pics = False  # True to save high res pics from camera.
                     # Careful, each photo costs against your daily Tumblr upload max.
 camera_iso = 800    # adjust for lighting issues. Normal is 100 or 200. Sort of dark is 400. Dark is 800 max.
                     # available options: 100, 200, 320, 400, 500, 640, 800
+
+# Configure sudoers on your system, to can execute shutdown whitout password
+# Add this line in file /etc/sudoers
+# myUser ALL = (root) NOPASSWD: /sbin/halt
+enabled_shutdown_btn = False
