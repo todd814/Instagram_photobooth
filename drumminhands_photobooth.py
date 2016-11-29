@@ -34,8 +34,8 @@ test_server = 'www.google.com'
 # full frame of v1 camera is 2592x1944. Wide screen max is 2592,1555
 # if you run into resource issues, try smaller, like 1920x1152.
 # or increase memory http://picamera.readthedocs.io/en/release-1.12/fov.html#hardware-limits
-high_res_w = 1296 # width of high res image, if taken
-high_res_h = 972 # height of high res image, if taken
+high_res_w = config.camera_high_res_w # width of high res image, if taken
+high_res_h = config.camera_high_res_h # height of high res image, if taken
 
 #############################
 ### Variables that Change ###

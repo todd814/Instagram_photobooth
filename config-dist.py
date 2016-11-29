@@ -24,6 +24,12 @@ hi_res_pics = False  # True to save high res pics from camera.
 camera_iso = 800    # adjust for lighting issues. Normal is 100 or 200. Sort of dark is 400. Dark is 800 max.
                     # available options: 100, 200, 320, 400, 500, 640, 800
 
+                    # full frame of v1 camera is 2592x1944. Wide screen max is 2592,1555
+                    # if you run into resource issues, try smaller, like 1920x1152.
+                    # or increase memory http://picamera.readthedocs.io/en/release-1.12/fov.html#hardware-limits
+camera_high_res_w = 1296 # width
+camera_high_res_h = 972 # height
+
 # Configure sudoers on your system, to can execute shutdown whitout password
 # Add this line in file /etc/sudoers
 # myUser ALL = (root) NOPASSWD: /sbin/halt
