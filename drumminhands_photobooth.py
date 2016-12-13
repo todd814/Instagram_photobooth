@@ -85,10 +85,11 @@ if not config.debug_mode:
 # Functions #
 #############
 
-# clean up running programs as needed when main program exits
-
 
 def cleanup():
+    """
+    @brief      clean up running programs as needed when main program exits
+    """
     print('Ended abruptly')
     pygame.quit()
     GPIO.cleanup()
@@ -96,19 +97,23 @@ def cleanup():
 
 atexit.register(cleanup)
 
-# A function to handle keyboard/mouse/device input events
-
 
 def input(events):
+    """
+    @brief      A function to handle keyboard/mouse/device input events
+    @param      events  The events
+    """
     for event in events:  # Hit the ESC key to quit the slideshow.
         if (event.type == QUIT or
                 (event.type == KEYDOWN and event.key == K_ESCAPE)):
             pygame.quit()
 
-# delete files in folder
-
 
 def clear_pics(channel):
+    """
+    @brief      delete files in pics folder
+    @param      channel  The channel
+    """
     files = glob.glob(config.file_path + '*')
     for f in files:
         os.remove(f)
@@ -120,10 +125,12 @@ def clear_pics(channel):
         GPIO.output(led_pin, False)
         sleep(0.25)
 
-# check if connected to the internet
-
 
 def is_connected():
+    """
+    @brief      Determines if connected to the internet
+    @return     True if connected, False otherwise.
+    """
     try:
         # see if we can resolve the host name -- tells us if there is a DNS
         # listening
@@ -136,15 +143,19 @@ def is_connected():
         pass
     return False
 
-# set variables to properly display the image on screen at right ratio
-
 
 def set_demensions(img_w, img_h):
-    # Note this only works when in booting in desktop mode.
-    # When running in terminal, the size is not correct (it displays small).
-    # Why?
+    """
+    @brief      Set variables to properly display the image on screen at right ratio
+                Note this only works when in booting in desktop mode.
+                When running in terminal, the size is not correct (it displays small).
+                Why?
 
-        # connect to global vars
+    @param      img_w  The image w
+    @param      img_h  The image h
+    """
+
+    # connect to global vars
     global transform_y, transform_x, offset_y, offset_x
 
     # based on output screen resolution, calculate how to display
@@ -179,12 +190,14 @@ def set_demensions(img_w, img_h):
 #     print "offset_y: "+ str(offset_y)
 #     print "offset_x: "+ str(offset_x)
 
-# display one image on screen
-
 
 def show_image(image_path):
+    """
+    @brief      Display one image on screen
+    @param      image_path  The image path
+    """
 
-        # clear the screen
+    # clear the screen
     screen.fill((0, 0, 0))
 
     # load the image
@@ -199,26 +212,30 @@ def show_image(image_path):
     screen.blit(img, (offset_x, offset_y))
     pygame.display.flip()
 
-# display a blank screen
-
 
 def clear_screen():
+    """
+    @brief      display a blank screen
+    """
     screen.fill((0, 0, 0))
     pygame.display.flip()
 
-# display a group of images
-
 
 def display_pics(jpg_group):
+    """
+    @brief      Display a group of images
+    @param      jpg_group  The jpg group
+    """
     for i in range(0, replay_cycles):  # show pics a few times
         for i in range(1, total_pics + 1):  # show each pic
             show_image(config.file_path + jpg_group + "-0" + str(i) + ".jpg")
             time.sleep(replay_delay)  # pause
 
-# define the photo taking function for when the big button is pressed
-
 
 def start_photobooth():
+    """
+    @brief      Define the photo taking function for when the big button is pressed
+    """
 
     # press escape to exit pygame. Then press ctrl-c to exit python.
     input(pygame.event.get())
@@ -416,9 +433,6 @@ def shutdown(channel):
                 myUser ALL = (root) NOPASSWD: /sbin/halt
     """
     print("Your RaspberryPi will be shut down in few seconds...")
-    # config sudoers to be available to execute shutdown whitout password
-    # Add this line in file /etc/sudoers
-    # myUser ALL = (root) NOPASSWD: /sbin/halt
     os.system("sudo halt -p")
 
 
