@@ -54,7 +54,7 @@ replay_delay = 1
 replay_cycles = 2  # how many times to show each photo on-screen after taking
 
 #######################
-# Photobooth image #
+# Photo booth image #
 #######################
 # Image ratio 4/3
 image_h = 525
@@ -416,9 +416,9 @@ def start_photobooth():
                         print('Something went wrong. Could not write file.')
                         sys.exit(0)  # quit Python
 
-    if config.make_photobooth_image:
-        print("Creating a photo booth picture")
-        photobooth_image(now)
+    if config.make_photo_booth:
+        print("Creating an photo_booth picture")
+        photo_booth_image()
 
     #
     #  Begin Step 4
@@ -455,7 +455,6 @@ def shutdown(channel):
     """
     print("Your RaspberryPi will be shut down in few seconds...")
     os.system("sudo halt -p")
-
 
 def photobooth_image(now):
     # Load images
