@@ -56,5 +56,8 @@ camera_color_preview = False
 # myUser ALL = (root) NOPASSWD: /sbin/halt
 enable_shutdown_btn = False
 
+# Printing configuration
+enable_print_btn = False
+
 # Debug mode
 debug_mode = False

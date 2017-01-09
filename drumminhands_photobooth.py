@@ -17,6 +17,7 @@ import pygame
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 import pytumblr  # https://github.com/tumblr/pytumblr
 import config  # this is the config python file config.py
+import cups
 
 ####################
 # Variables Config #
@@ -24,6 +25,7 @@ import config  # this is the config python file config.py
 led_pin = 7  # LED
 btn_pin = 18  # pin for the start button
 shutdown_btn_pin = 18  # pin for the shutdown button
+print_btn_pin = 12  # pin for the print button
 
 total_pics = 4  # number of pics to be taken
 capture_delay = 1  # delay between pics
@@ -69,6 +71,7 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup(led_pin, GPIO.OUT)  # LED
 GPIO.setup(btn_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(shutdown_btn_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(print_btn_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # for some reason the pin turns on at the beginning of the program. Why?
 GPIO.output(led_pin, False)
 
@@ -436,9 +439,23 @@ def shutdown(channel):
     os.system("sudo halt -p")
 
 
+def print_image(channel):
+    # Connect to cups and select printer 0
+    conn = cups.Connection()
+    printers = conn.getPrinters()
+    printer_name = printers.keys()[0]
+
+    # get last image
+    files = filter(os.path.isfile, glob.glob(config.file_path + "/photobooth/*"))
+    files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+
+    # Lunch printing
+    conn.printFile(printer_name, files[0], "PhotoBooth", {})
+
 ##################
 #  Main Program  #
 ##################
+
 
 # clear the previously stored pics based on config settings
 if config.clear_on_startup:
@@ -447,6 +464,10 @@ if config.clear_on_startup:
 # Add event listener to catch shutdown request
 if config.enable_shutdown_btn:
     GPIO.add_event_detect(shutdown_btn_pin, GPIO.FALLING, callback=shutdown, bouncetime=1000)
+
+# If printing enable, add event listener on print button
+if config.enable_print_btn:
+    GPIO.add_event_detect(print_btn_pin, GPIO.FALLING, callback=print_image, bouncetime=1000)
 
 print "Photo booth app running..."
 for x in range(0, 5):  # blink light to show the app is running
