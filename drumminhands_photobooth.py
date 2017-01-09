@@ -71,12 +71,13 @@ output_w = 1800
 real_path = os.path.dirname(os.path.realpath(__file__))
 
 # Setup the tumblr OAuth Client
-client = pytumblr.TumblrRestClient(
-    config.consumer_key,
-    config.consumer_secret,
-    config.oath_token,
-    config.oath_secret,
-)
+if config.post_online:  # turn off posting pics online in config.py
+    client = pytumblr.TumblrRestClient(
+        config.consumer_key,
+        config.consumer_secret,
+        config.oath_token,
+        config.oath_secret,
+    )
 
 # GPIO setup
 GPIO.setmode(GPIO.BCM)

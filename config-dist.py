@@ -4,8 +4,8 @@
 # https://api.tumblr.com/console/calls/user/info
 consumer_key = 'CONSUMER_KEY'  # replace with your key
 consumer_secret = 'CONSUMER_SECRET'  # replace with your secret code
-oath_token = 'OATH_TOKEN'  # replace with your oath token
-oath_secret = 'OATH_SECRET'  # replace with your oath secret code
+oauth_token = 'OAUTH_TOKEN'  # replace with your oauth token
+oauth_secret = 'OAUTH_SECRET'  # replace with your oauth secret code
 # replace with your tumblr account name without .tumblr.com
 tumblr_blog = 'TUMBLR_BLOG'
 tagsForTumblr = "MyTagsHere"  # change to tags you want, separated with commas
