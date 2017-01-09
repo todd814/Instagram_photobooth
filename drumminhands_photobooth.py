@@ -238,7 +238,8 @@ def start_photobooth():
     camera = picamera.PiCamera()
     camera.vflip = False
     camera.hflip = True  # flip for preview, showing users a mirror image
-    camera.saturation = -100  # comment out this line if you want color images
+    if not config.camera_color_preview:
+        camera.saturation = -100
     camera.iso = config.camera_iso
 
     pixel_width = 0  # local variable declaration
