@@ -52,3 +52,6 @@ camera_high_res_h = 972  # height
 # Add this line in file /etc/sudoers
 # myUser ALL = (root) NOPASSWD: /sbin/halt
 enable_shutdown_btn = False
+
+# Debug mode
+debug_mode = False
