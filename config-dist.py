@@ -51,6 +51,9 @@ camera_high_res_h = 972  # height
 # enable color on camera preview
 camera_color_preview = False
 
+# Create a picture with 2x2 photos like in photo booth
+make_photobooth_image = True
+
 # Configure sudoers on your system, to can execute shutdown whitout password
 # Add this line in file /etc/sudoers
 # myUser ALL = (root) NOPASSWD: /sbin/halt

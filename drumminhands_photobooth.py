@@ -53,6 +53,18 @@ offset_y = 0  # how far off to left corner to display photos
 replay_delay = 1
 replay_cycles = 2  # how many times to show each photo on-screen after taking
 
+#######################
+# Photobooth image #
+#######################
+# Image ratio 4/3
+image_h = 525
+image_w = 700
+margin = 50
+
+# Output image ration 3/2
+output_h = 1200
+output_w = 1800
+
 ################
 # Other Config #
 ################
@@ -402,6 +414,10 @@ def start_photobooth():
                         print('Something went wrong. Could not write file.')
                         sys.exit(0)  # quit Python
 
+    if config.make_photobooth_image:
+        print("Creating a photo booth picture")
+        photobooth_image(now)
+
     #
     #  Begin Step 4
     #
@@ -437,6 +453,30 @@ def shutdown(channel):
     """
     print("Your RaspberryPi will be shut down in few seconds...")
     os.system("sudo halt -p")
+
+
+def photobooth_image(now):
+    # Load images
+    bgimage = pygame.image.load("bgimage.png")
+    image1 = pygame.image.load(config.file_path + now + "-01.jpg")
+    image2 = pygame.image.load(config.file_path + now + "-02.jpg")
+    image3 = pygame.image.load(config.file_path + now + "-03.jpg")
+    image4 = pygame.image.load(config.file_path + now + "-04.jpg")
+
+    # Resize images
+    bgimage = pygame.transform.scale(bgimage, (output_w, output_h))
+    image1 = pygame.transform.scale(image1, (image_w, image_h))
+    image2 = pygame.transform.scale(image2, (image_w, image_h))
+    image3 = pygame.transform.scale(image3, (image_w, image_h))
+    image4 = pygame.transform.scale(image4, (image_w, image_h))
+
+    # Merge images
+    bgimage.blit(image1, (margin, margin))
+    bgimage.blit(image2, (margin * 2 + image_w, margin))
+    bgimage.blit(image3, (margin, margin * 2 + image_h))
+    bgimage.blit(image4, (margin * 2 + image_w, margin * 2 + image_h))
+
+    pygame.image.save(bgimage, config.file_path + "/photobooth/" + now + ".jpg")
 
 
 def print_image(channel):
