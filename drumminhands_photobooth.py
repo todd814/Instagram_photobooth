@@ -22,8 +22,8 @@ import cups
 ####################
 # Variables Config #
 ####################
-led_pin = 7  # LED
-btn_pin = 18  # pin for the start button
+led_pin = 27  # LED
+btn_pin = 17  # pin for the start button
 shutdown_btn_pin = 18  # pin for the shutdown button
 print_btn_pin = 12  # pin for the print button
 
@@ -79,7 +79,7 @@ client = pytumblr.TumblrRestClient(
 )
 
 # GPIO setup
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(led_pin, GPIO.OUT)  # LED
 GPIO.setup(btn_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(shutdown_btn_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
