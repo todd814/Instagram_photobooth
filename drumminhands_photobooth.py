@@ -23,6 +23,7 @@ import config  # this is the config python file config.py
 ####################
 led_pin = 7  # LED
 btn_pin = 18  # pin for the start button
+shutdown_btn_pin = 18  # pin for the shutdown button
 
 total_pics = 4  # number of pics to be taken
 capture_delay = 1  # delay between pics
@@ -67,6 +68,7 @@ client = pytumblr.TumblrRestClient(
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(led_pin, GPIO.OUT)  # LED
 GPIO.setup(btn_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(shutdown_btn_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # for some reason the pin turns on at the beginning of the program. Why?
 GPIO.output(led_pin, False)
 
@@ -404,7 +406,13 @@ def start_photobooth():
     GPIO.output(led_pin, True)  # turn on the LED
 
 
-def shutdown():
+def shutdown(channel):
+    """
+    @brief      Shutdown the RaspberryPi
+                config sudoers to be available to execute shutdown whitout password
+                Add this line in file /etc/sudoers
+                myUser ALL = (root) NOPASSWD: /sbin/halt
+    """
     print("Your RaspberryPi will be shut down in few seconds...")
     # config sudoers to be available to execute shutdown whitout password
     # Add this line in file /etc/sudoers
@@ -420,6 +428,9 @@ def shutdown():
 if config.clear_on_startup:
     clear_pics(1)
 
+# Add event listener to catch shutdown request
+if config.enable_shutdown_btn:
+    GPIO.add_event_detect(shutdown_btn_pin, GPIO.FALLING, callback=shutdown, bouncetime=1000)
 
 print "Photo booth app running..."
 for x in range(0, 5):  # blink light to show the app is running

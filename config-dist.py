@@ -47,3 +47,8 @@ camera_iso = 800
 # http://picamera.readthedocs.io/en/release-1.12/fov.html#hardware-limits
 camera_high_res_w = 1296  # width
 camera_high_res_h = 972  # height
+
+# Configure sudoers on your system, to can execute shutdown whitout password
+# Add this line in file /etc/sudoers
+# myUser ALL = (root) NOPASSWD: /sbin/halt
+enable_shutdown_btn = False
