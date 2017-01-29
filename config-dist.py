@@ -31,7 +31,8 @@ capture_count_pics = True
 # True to make an animated gif. False to post 4 jpgs into one post.
 make_gifs = True
 # True to make an photomaton image. False do nothing.
-make_photo_booth = True
+make_photobooth_image = True
+
 # True to save high res pics from camera.
 # If also uploading, the program will also convert each image
 # to a smaller image before making the gif.
@@ -47,14 +48,14 @@ camera_iso = 800
 # if you run into resource issues, try smaller, like 1920x1152.
 # or increase memory
 # http://picamera.readthedocs.io/en/release-1.12/fov.html#hardware-limits
-camera_high_res_w = 1296  # width
-camera_high_res_h = 972  # height
+camera_high_res_w = 1296  # width (max 2592)
+camera_high_res_h = 972  # height (max 1944)
 
 # enable color on camera preview
 camera_color_preview = False
 
-# Create a picture with 2x2 photos like in photo booth
-make_photobooth_image = True
+# camera orientation
+camera_landscape = True
 
 # Configure sudoers on your system, to can execute shutdown whitout password
 # Add this line in file /etc/sudoers

@@ -29,9 +29,9 @@ print_btn_pin = 12  # pin for the print button
 
 total_pics = 4  # number of pics to be taken
 capture_delay = 1  # delay between pics
-prep_delay = 5  # number of seconds at step 1 as users prep to have photo taken
+prep_delay = 3  # number of seconds at step 1 as users prep to have photo taken
 gif_delay = 100  # How much time between frames in the animated gif
-restart_delay = 10  # how long to display finished message before beginning a new session
+restart_delay = 5  # how long to display finished message before beginning a new session
 test_server = 'www.google.com'
 
 # full frame of v1 camera is 2592x1944. Wide screen max is 2592,1555
@@ -54,7 +54,7 @@ replay_delay = 1
 replay_cycles = 2  # how many times to show each photo on-screen after taking
 
 #######################
-# Photo booth image #
+# Photobooth image #
 #######################
 # Image ratio 4/3
 image_h = 525
@@ -64,6 +64,17 @@ margin = 50
 # Output image ration 3/2
 output_h = 1200
 output_w = 1800
+
+if not config.camera_landscape:
+    tmp = image_h
+    image_h = image_w
+    image_w = tmp
+    tmp = output_h
+    output_h = output_w
+    output_w = tmp
+    tmp = high_res_h
+    high_res_h = high_res_w
+    high_res_w = tmp
 
 ################
 # Other Config #
@@ -269,8 +280,6 @@ def start_photobooth():
     clear_screen()
 
     camera = picamera.PiCamera()
-    camera.vflip = False
-    camera.hflip = True  # flip for preview, showing users a mirror image
     if not config.camera_color_preview:
         camera.saturation = -100
     camera.iso = config.camera_iso
@@ -299,19 +308,24 @@ def start_photobooth():
     if config.capture_count_pics:
         try:  # take the photos
             for i in range(1, total_pics + 1):
-                camera.hflip = True  # preview a mirror image
-                # start preview at low res but the right ratio
-                camera.start_preview(resolution=(
-                    config.monitor_w, config.monitor_h))
+                if config.camera_landscape:
+                    camera.hflip = True  # preview a mirror image
+                    camera.start_preview(resolution=(config.monitor_w, config.monitor_h))
+                else:
+                    camera.vflip = True
+                    camera.start_preview(rotation=270,resolution=(config.monitor_w, config.monitor_h))
                 time.sleep(2)  # warm up camera
                 GPIO.output(led_pin, True)  # turn on the LED
                 filename = config.file_path + now + '-0' + str(i) + '.jpg'
-                camera.hflip = False  # flip back when taking photo
+                camera.stop_preview()
+                if config.camera_landscape:
+                    camera.hflip = False  # flip back when taking photo
+                else:
+                    camera.vflip = False
                 os.system("aplay camera-shutter-sound.wav")  # Play sound
                 camera.capture(filename)
                 print(filename)
                 GPIO.output(led_pin, False)  # turn off the LED
-                camera.stop_preview()
                 show_image(real_path + "/pose" + str(i) + ".png")
                 time.sleep(capture_delay)  # pause in-between shots
                 clear_screen()
@@ -320,8 +334,12 @@ def start_photobooth():
         finally:
             camera.close()
     else:
+        print("low resolution")
         # start preview at low res but the right ratio
-        camera.start_preview(resolution=(config.monitor_w, config.monitor_h))
+        if config.camera_landscape:
+            camera.start_preview(resolution=(config.monitor_w, config.monitor_h))
+        else:
+            camera.start_preview(rotation=270,resolution=(config.monitor_w, config.monitor_h))
         time.sleep(2)  # warm up camera
 
         try:  # take the photos
@@ -416,9 +434,9 @@ def start_photobooth():
                         print('Something went wrong. Could not write file.')
                         sys.exit(0)  # quit Python
 
-    if config.make_photo_booth:
-        print("Creating an photo_booth picture")
-        photo_booth_image()
+    if config.make_photobooth_image:
+        print("Creating a photo booth picture")
+        photobooth_image(now)
 
     #
     #  Begin Step 4
@@ -456,13 +474,19 @@ def shutdown(channel):
     print("Your RaspberryPi will be shut down in few seconds...")
     os.system("sudo halt -p")
 
+
 def photobooth_image(now):
+
     # Load images
     bgimage = pygame.image.load("bgimage.png")
     image1 = pygame.image.load(config.file_path + now + "-01.jpg")
     image2 = pygame.image.load(config.file_path + now + "-02.jpg")
     image3 = pygame.image.load(config.file_path + now + "-03.jpg")
     image4 = pygame.image.load(config.file_path + now + "-04.jpg")
+
+    # Rotate Background
+    if not config.camera_landscape:
+        bgimage = pygame.transform.rotate(bgimage, 270)
 
     # Resize images
     bgimage = pygame.transform.scale(bgimage, (output_w, output_h))
