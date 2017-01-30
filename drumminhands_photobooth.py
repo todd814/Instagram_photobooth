@@ -307,6 +307,7 @@ def start_photobooth():
                 GPIO.output(led_pin, True)  # turn on the LED
                 filename = config.file_path + now + '-0' + str(i) + '.jpg'
                 camera.hflip = False  # flip back when taking photo
+                os.system("aplay camera-shutter-sound.wav")  # Play sound
                 camera.capture(filename)
                 print(filename)
                 GPIO.output(led_pin, False)  # turn off the LED
