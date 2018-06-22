@@ -14,10 +14,11 @@ import atexit
 import sys
 import socket
 import pygame
+import shutil
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
-import pytumblr  # https://github.com/tumblr/pytumblr
+from InstagramAPI import InstagramAPI
 import config  # this is the config python file config.py
-import cups
+#import cups
 
 ####################
 # Variables Config #
@@ -51,7 +52,7 @@ offset_x = 0  # how far off to left corner to display photos
 offset_y = 0  # how far off to left corner to display photos
 # how much to wait in-between showing pics on-screen after taking
 replay_delay = 1
-replay_cycles = 2  # how many times to show each photo on-screen after taking
+replay_cycles = 1  # how many times to show each photo on-screen after taking
 
 #######################
 # Photobooth image #
@@ -81,15 +82,12 @@ if not config.camera_landscape:
 ################
 real_path = os.path.dirname(os.path.realpath(__file__))
 
-# Setup the tumblr OAuth Client
-if config.post_online:  # turn off posting pics online in config.py
-    client = pytumblr.TumblrRestClient(
-        config.consumer_key,
-        config.consumer_secret,
-        config.oath_token,
-        config.oath_secret,
-    )
 
+# Setup the instagram Client
+if config.post_online:  # turn off posting pics online in config.py
+    InstagramAPI = InstagramAPI(config.Insta_login, config.Insta_pass)
+    InstagramAPI.login()
+    
 # GPIO setup
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(led_pin, GPIO.OUT)  # LED
@@ -145,7 +143,7 @@ def clear_pics(channel):
     for f in files:
         os.remove(f)
     # light the lights in series to show completed
-    print "Deleted previous pics"
+    print ("Deleted previous pics")
     for x in range(0, 3):  # blink light
         GPIO.output(led_pin, True)
         sleep(0.25)
@@ -258,6 +256,61 @@ def display_pics(jpg_group):
             show_image(config.file_path + jpg_group + "-0" + str(i) + ".jpg")
             time.sleep(replay_delay)  # pause
 
+def moveit(now):
+	for f in os.listdir(config.temp_file_path):
+		if f.endswith(".jpg"):
+			shutil.move(config.temp_file_path + f, config.file_path + now + "-" + f)
+		if f.endswith(".gif"):
+			shutil.move(config.temp_file_path + f, config.file_path + f)
+
+def remove_temp(now):
+	for fd in os.listdir(config.temp_file_path):
+		print("deleting" + " " + fd)
+		os.unlink(config.temp_file_path + fd)
+
+def mp4(now):
+	if config.make_mp4:
+		import moviepy.editor as mp
+		print("make mp4")
+		clip = mp.VideoFileClip(config.temp_file_path + now + ".gif")
+		clip.write_videofile(config.file_path + now + ".mp4")
+
+def postonline(now):
+    if config.post_online:  # turn off posting pics online in config.py
+        # check to see if you have an internet connection
+        connected = is_connected()
+
+    if not connected:
+	    print ("bad internet connection")
+
+    while connected:
+	    if config.post_insta:
+		    print("posting")
+		    try:
+			    #upload to insta
+			    file_to_upload = config.file_path + now + "-montage.jpg"
+			    Instacaption = config.Insta_caption
+			    InstagramAPI.uploadPhoto(file_to_upload, caption=Instacaption)
+			    print("posted")
+
+		#if config.post_gdrive:
+			#try:
+				#upload to google
+				#photo_path = config.file_path + now + "square" + ".gif"
+				#Instacaption = config.Insta_caption
+				#InstagramAPI.uploadPhoto(photo_path, caption=Instacaption)
+					
+			    break
+		    except ValueError:
+				    print ("Oops. No internect connection. Upload later.")
+				    try:  # make a text file as a note to upload the .gif later
+					# Trying to create a new file or open one
+					    file = open(config.file_path + now +
+								    "-FILENOTUPLOADED.txt", 'w')
+					    file.close()
+				    except:
+					    print('Something went wrong. Could not write file.')
+					    sys.exit(0)  # quit Python
 
 def start_photobooth():
     """
@@ -271,7 +324,7 @@ def start_photobooth():
     #  Begin Step 1
     #
 
-    print "Get Ready"
+    print ("Get Ready")
     GPIO.output(led_pin, False)
     show_image(real_path + "/instructions.png")
     sleep(prep_delay)
@@ -300,7 +353,7 @@ def start_photobooth():
     #  Begin Step 2
     #
 
-    print "Taking pics"
+    print ("Taking pics")
 
     # get the current date and time for the start of the filename
     now = time.strftime("%Y-%m-%d-%H-%M-%S")
@@ -316,7 +369,7 @@ def start_photobooth():
                     camera.start_preview(rotation=270,resolution=(config.monitor_w, config.monitor_h))
                 time.sleep(2)  # warm up camera
                 GPIO.output(led_pin, True)  # turn on the LED
-                filename = config.file_path + now + '-0' + str(i) + '.jpg'
+                filename = config.temp_file_path + '0' + str(i) + '.jpg'
                 camera.stop_preview()
                 if config.camera_landscape:
                     camera.hflip = False  # flip back when taking photo
@@ -361,78 +414,85 @@ def start_photobooth():
     # press escape to exit pygame. Then press ctrl-c to exit python.
     input(pygame.event.get())
 
-    print "Creating an animated gif"
-
     if config.post_online:
         show_image(real_path + "/uploading.png")
     else:
         show_image(real_path + "/processing.png")
 
-    if config.make_gifs:  # make the gifs
-        if config.hi_res_pics:
-            # first make a small version of each image. Tumblr's max animated
-            # gif's are 500 pixels wide.
-            for x in range(1, total_pics + 1):  # batch process all the images
-                graphicsmagick = "gm convert -size 500x500 " + config.file_path + now + "-0" + \
-                    str(x) + ".jpg -thumbnail 500x500 " + \
-                    config.file_path + now + "-0" + str(x) + "-sm.jpg"
-                os.system(graphicsmagick)  # do the graphicsmagick action
+	#graphicsmagick
+    b = open(config.temp_file_path + "batch.gm","w+")
+    if config.make_montage:
+	    print("making montage")
+	    montage = config.temp_file_path + "montage.png"
+	    fmontage = config.file_path + now + "-montage.jpg"
+	    graphicsmagick = "montage -geometry 540x540 -mode concatenate -tile 2x" + " " + \
+	    config.temp_file_path + "*.jpg" + " " + montage
+	    b.write(graphicsmagick)
+	    b.write("\n")
+	    #os.system(graphicsmagick) #original montage saved to tmp mem
+	    if config.use_logo:
+	    	print("making montage logo")
+	    	graphicsmagick = "convert -extent 0x740" + " " + montage + " " + montage
+	    	#os.system(graphicsmagick)
+	    	b.write(graphicsmagick)
+	    	b.write("\n")
+	    	graphicsmagick = "composite -gravity south" + " " + \
+	    	config.logo_path + " " + montage + " " + fmontage
+	    	#os.system(graphicsmagick) #saved to sd path
+	    	b.write(graphicsmagick)
+	    	b.write("\n")
+	    if config.use_text:
+	    	print("making montage text")
+	    	graphicsmagick = "convert -extent 0x740 -gravity south" + " " + \
+	    	"-font" + " " + config.font + " " + \
+	    	"-fill" + " " + config.color + " " + \
+	    	"-pointsize" + " " + config.size + " " + \
+	    	"-draw" + " " + config.text + " " + \
+	    	montage + " " + fmontage
+	    	#os.system(graphicsmagick) #saves to sd path
+	    	b.write(graphicsmagick)
+	    	b.write("\n")
 
-            graphicsmagick = "gm convert -delay " + \
-                str(gif_delay) + " " + config.file_path + now + \
-                "*-sm.jpg " + config.file_path + now + ".gif"
-            os.system(graphicsmagick)  # make the .gif
-        else:
-            # make an animated gif with the low resolution images
-            graphicsmagick = "gm convert -delay " + \
-                str(gif_delay) + " " + config.file_path + now + \
-                "*.jpg " + config.file_path + now + ".gif"
-            os.system(graphicsmagick)  # make the .gif
+    print("making mogrify")
+    graphicsmagick = "mogrify -geometry 1920x942" + " " + config.temp_file_path + "*.jpg" + " " + \
+    "-extent 0x1080" + " " + config.temp_file_path + "*.jpg"
+    #os.system(graphicsmagick)
+    b.write(graphicsmagick)
+    b.write("\n")
+    for x in range(1, total_pics + 1):
+    	use = config.temp_file_path + "0" + str(x) + ".jpg"
+    	if config.use_logo:
+    		print("add image")
+    		graphicsmagick = "composite -gravity south" + " " + \
+    		config.logo_path + " " + use + " " + use
+    		#os.system(graphicsmagick)
+    		b.write(graphicsmagick)
+    		b.write("\n")
+    	if config.use_text:
+    		print("add text")
+    		graphicsmagick = "convert -gravity south" + " " + \
+    		"-font" + " " + config.font + " " + \
+    		"-fill" + " " + config.color + " " + \
+    		"-pointsize" + " " + config.size + " " + \
+    		"-draw" + " " + config.text + " " + \
+    		use + " " + use
+    		#os.system(graphicsmagick)
+    		b.write(graphicsmagick)
+    		b.write("\n")
 
-    if config.post_online:  # turn off posting pics online in config.py
-        # check to see if you have an internet connection
-        connected = is_connected()
-
-        if not connected:
-            print "bad internet connection"
-
-        while connected:
-            if config.make_gifs:
-                try:
-                    file_to_upload = config.file_path + now + ".gif"
-                    client.create_photo(config.tumblr_blog, state="published", tags=[
-                                        config.tagsForTumblr], data=file_to_upload)
-                    break
-                except ValueError:
-                    print "Oops. No internect connection. Upload later."
-                    try:  # make a text file as a note to upload the .gif later
-                        # Trying to create a new file or open one
-                        file = open(config.file_path + now +
-                                    "-FILENOTUPLOADED.txt", 'w')
-                        file.close()
-                    except:
-                        print('Something went wrong. Could not write file.')
-                        sys.exit(0)  # quit Python
-            else:  # upload jpgs instead
-                try:
-                    # create an array and populate with file paths to our jpgs
-                    myJpgs = [0 for i in range(4)]
-                    for i in range(4):
-                        myJpgs[i] = config.file_path + \
-                            now + "-0" + str(i + 1) + ".jpg"
-                    client.create_photo(config.tumblr_blog, state="published", tags=[
-                                        config.tagsForTumblr], format="markdown", data=myJpgs)
-                    break
-                except ValueError:
-                    print "Oops. No internect connection. Upload later."
-                    try:  # make a text file as a note to upload the .gif later
-                        # Trying to create a new file or open one
-                        file = open(config.file_path + now +
-                                    "-FILENOTUPLOADED.txt", 'w')
-                        file.close()
-                    except:
-                        print('Something went wrong. Could not write file.')
-                        sys.exit(0)  # quit Python
+    if config.make_gifs:
+        print("making gif")
+    	graphicsmagick = "convert -geometry 1080x1080 -delay" + " " + \
+    	str(gif_delay) + " " + config.temp_file_path + "*.jpg" + " " + \
+    	config.temp_file_path + now + ".gif"
+    	#os.system(graphicsmagick)  # make the .gif
+    	b.write(graphicsmagick)
+    	b.write("\n")
+	b.close()
+    os.system("gm batch" + " " + config.temp_file_path + "batch.gm")
+    
+    if config.make_mp4:
+		mp4(now)
 
     if config.make_photobooth_image:
         print("Creating a photo booth picture")
@@ -444,21 +504,24 @@ def start_photobooth():
 
     # press escape to exit pygame. Then press ctrl-c to exit python.
     input(pygame.event.get())
-
+	
     try:
-        display_pics(now)
-    except Exception, e:
+		moveit(now)
+		postonline(now)
+		display_pics(now)
+		remove_temp(now)		
+		
+    except Exception as e:
         tb = sys.exc_info()[2]
         traceback.print_exception(e.__class__, e, tb)
         pygame.quit()
 
-    print "Done"
+    print ("Done")
 
     if config.post_online:
         show_image(real_path + "/finished.png")
     else:
         show_image(real_path + "/finished2.png")
-
     time.sleep(restart_delay)
     show_image(real_path + "/intro.png")
     GPIO.output(led_pin, True)  # turn on the LED
@@ -514,7 +577,7 @@ def print_image(channel):
     files = filter(os.path.isfile, glob.glob(config.file_path + "/photobooth/*"))
     files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
 
-    # Lunch printing
+    # Launch printing
     conn.printFile(printer_name, files[0], "PhotoBooth", {})
 
 ##################
@@ -534,7 +597,7 @@ if config.enable_shutdown_btn:
 if config.enable_print_btn:
     GPIO.add_event_detect(print_btn_pin, GPIO.FALLING, callback=print_image, bouncetime=1000)
 
-print "Photo booth app running..."
+print ("Photo booth app running...")
 for x in range(0, 5):  # blink light to show the app is running
     GPIO.output(led_pin, True)
     sleep(0.25)

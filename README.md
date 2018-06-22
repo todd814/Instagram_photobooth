@@ -1,15 +1,19 @@
-drumminhands_photobooth
+Insta_Booth
 =======================
 
-A DIY photo booth using a Raspberry Pi that automatically sends animated gifs to a Tumblr account. Great for events.
+A DIY photo booth using a Raspberry Pi 3 that automatically <strike>sends animated gifs to a Tumblr account.</strike>
+uploads a 4 quadrent photo to instagram <strike>and prints a photostrip</strike>. Great for events.
 
-Updated to version 3.0
-
+Updated to version 4.0
+inspiration from drumminhands:
 Find the full set of instructions here: http://www.drumminhands.com/2014/06/15/raspberry-pi-photo-booth/
 This requires:
   - PiCamera -- http://picamera.readthedocs.org/
   - GraphicsMagick -- http://www.graphicsmagick.org/
-  - pytumblr -- https://github.com/tumblr/pytumblr
+  
+  <strike>- pytumblr -- https://github.com/tumblr/pytumblr</strike> loads in the script but code was removed for time being
+  
+  - Instagram-API -- https://github.com/LevPasha/Instagram-API-python
 
 
 Create your own config

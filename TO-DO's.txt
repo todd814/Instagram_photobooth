@@ -1,0 +1,13 @@
+NEEDs
+Fix and make sure Printing works
+make sure camera settings are good
+lighting ect.
+
+
+WANTs
+Consider setting max aspect ratio's and dynamatic resizing of logo??
+Dynamic Hash tags?? "use some computer vision to generate tags based on what it sees"
+Explore converting gif into mp4 and uploading to insta ***have issues with moviepy install
+Code cleanup
+move image references for "splash screens" into proper dir and change references
+explore adding boarder around completed photos
