@@ -425,14 +425,14 @@ def start_photobooth():
 	    print("making montage")
 	    montage = config.temp_file_path + "montage.png"
 	    fmontage = config.file_path + now + "-montage.jpg"
-	    graphicsmagick = "montage -geometry 540x540 -mode concatenate -tile 2x" + " " + \
+	    graphicsmagick = "montage -geometry 720x720 -mode concatenate -tile 2x" + " " + \
 	    config.temp_file_path + "*.jpg" + " " + montage
 	    b.write(graphicsmagick)
 	    b.write("\n")
 	    #os.system(graphicsmagick) #original montage saved to tmp mem
 	    if config.use_logo:
 	    	print("making montage logo")
-	    	graphicsmagick = "convert -extent 0x740" + " " + montage + " " + montage
+	    	graphicsmagick = "convert -extent 0x962" + " " + montage + " " + montage
 	    	#os.system(graphicsmagick)
 	    	b.write(graphicsmagick)
 	    	b.write("\n")
@@ -443,7 +443,7 @@ def start_photobooth():
 	    	b.write("\n")
 	    if config.use_text:
 	    	print("making montage text")
-	    	graphicsmagick = "convert -extent 0x740 -gravity south" + " " + \
+	    	graphicsmagick = "convert -extent 0x962 -gravity south" + " " + \
 	    	"-font" + " " + config.font + " " + \
 	    	"-fill" + " " + config.color + " " + \
 	    	"-pointsize" + " " + config.size + " " + \
@@ -488,7 +488,8 @@ def start_photobooth():
     	#os.system(graphicsmagick)  # make the .gif
     	b.write(graphicsmagick)
     	b.write("\n")
-	b.close()
+
+    b.close()
     os.system("gm batch" + " " + config.temp_file_path + "batch.gm")
     
     if config.make_mp4:
@@ -507,7 +508,8 @@ def start_photobooth():
 	
     try:
 		moveit(now)
-		postonline(now)
+		if config.post_online:
+			postonline(now)
 		display_pics(now)
 		remove_temp(now)		
 		

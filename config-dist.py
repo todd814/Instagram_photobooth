@@ -1,5 +1,5 @@
 # Debug mode
-debug_mode = True
+debug_mode = True #use this for testing in windowed mode
 
 # Instagram Setup
 # Replace the values with your information
@@ -15,23 +15,35 @@ temp_file_path = "/home/pi/photobooth/temp_pics/"
 # path to save final images on sdcard
 file_path = "/home/pi/photobooth/event_pics/"
 
+### Online Config ###
+
+# True to upload images. False to store locally only.
+post_online = False
+# True to upload images to insta. False to store locally only.
+post_insta = False
+# True to upload images. False to store locally only.
+post_gdrive = False
+
+### Image config ###
+
 make_montage = True #must be true to post to insta
 #use logo **if using text this must be false
-use_logo = False
+use_logo = True
 if use_logo:
 	logo_dir = "logos/"
-	logo_file = "your_logo.png" #must not extend 0x132
+	logo_file = "your_logo.png" #must not extend 0x132 *example img* your_logo.png
 	logo_path = logo_dir + logo_file
 	#text under pic
 #print text **if using logo this must be false
 
-use_text = True #**if using logo this must be false
+use_text = False #**if using logo this must be false
 if use_text:
-	text = "'text" + " " + "0,38" + " " + '"Example Text"' +"'" #your text goes in the ""
-	font = "helvetica"
+	text = "'text" + " " + "0,50" + " " + '"#Example Text using fonts/z003034l.pfb"' +"'" #params text position [your text in ""]
+	font = "fonts/z003034l.pfb"
 	color = "black"
-	size = "72"
+	size = "82"
 
+### Additional settings ###
 
 # True will clear previously stored photos as the program launches. False
 # will leave all previous photos.
@@ -39,21 +51,18 @@ clear_on_startup = False
 # how long to debounce the button. Add more time if the button triggers
 # too many times.
 debounce = 0.3
-# True to upload images. False to store locally only.
-post_online = True
-# True to upload images to insta. False to store locally only.
-post_insta = True
-# True to upload images. False to store locally only.
-post_gdrive = False
 # if true, show a photo count between taking photos. If false, do not.
 # False is faster.
-capture_count_pics = True ##didnt work on false
+capture_count_pics = True  ##didnt work on false
+
 # True to make an animated gif. False to post 4 jpgs into one post.
-make_gifs = True
+make_gifs = False
 #make a mp4 to upload to instagram
 make_mp4 = False
+
 # True to make an photomaton image. False do nothing.
 make_photobooth_image = False
+
 #thermal printer
 make_thermal = False
 
